@@ -1,0 +1,1025 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>JigChat V3 — Project Documentation</title>
+<style>
+  :root {
+    --primary: #f97316;
+    --primary-light: #fff7ed;
+    --text: #1e293b;
+    --muted: #64748b;
+    --border: #e2e8f0;
+    --code-bg: #f8fafc;
+    --code-border: #e2e8f0;
+    --heading-color: #0f172a;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    font-size: 13.5px;
+    line-height: 1.7;
+    color: var(--text);
+    background: #fff;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 48px 48px 80px;
+  }
+
+  /* Cover */
+  .cover {
+    text-align: center;
+    padding: 60px 0 48px;
+    border-bottom: 3px solid var(--primary);
+    margin-bottom: 48px;
+  }
+  .cover .logo {
+    font-size: 42px;
+    font-weight: 800;
+    color: var(--primary);
+    letter-spacing: -1px;
+  }
+  .cover .subtitle {
+    font-size: 15px;
+    color: var(--muted);
+    margin-top: 8px;
+  }
+  .cover .meta {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .cover .meta span { display: flex; align-items: center; gap: 5px; }
+
+  /* TOC */
+  .toc {
+    background: var(--primary-light);
+    border: 1px solid #fed7aa;
+    border-radius: 12px;
+    padding: 24px 32px;
+    margin-bottom: 48px;
+    page-break-inside: avoid;
+  }
+  .toc h2 { font-size: 13px; text-transform: uppercase; letter-spacing: 1px; color: var(--primary); margin-bottom: 14px; }
+  .toc ol { margin: 0; padding-left: 20px; }
+  .toc li { margin: 4px 0; }
+  .toc a { color: var(--text); text-decoration: none; font-size: 13px; }
+  .toc a:hover { color: var(--primary); }
+  .toc .sub { margin-left: 16px; margin-top: 2px; }
+  .toc .sub li { font-size: 12px; color: var(--muted); }
+
+  /* Headings */
+  h1 {
+    font-size: 26px;
+    font-weight: 800;
+    color: var(--heading-color);
+    border-bottom: 2px solid var(--primary);
+    padding-bottom: 10px;
+    margin: 48px 0 20px;
+    page-break-after: avoid;
+  }
+  h2 {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--heading-color);
+    margin: 32px 0 14px;
+    page-break-after: avoid;
+  }
+  h3 {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--primary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 24px 0 10px;
+    page-break-after: avoid;
+  }
+
+  p { margin-bottom: 12px; }
+
+  /* Code blocks */
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--code-border);
+    border-left: 3px solid var(--primary);
+    border-radius: 8px;
+    padding: 16px 20px;
+    overflow-x: auto;
+    font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+    font-size: 11.5px;
+    line-height: 1.6;
+    margin: 12px 0 20px;
+    page-break-inside: avoid;
+    white-space: pre;
+  }
+  code {
+    font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+    font-size: 11.5px;
+    background: #f1f5f9;
+    padding: 1px 5px;
+    border-radius: 4px;
+    color: #be185d;
+  }
+
+  /* Tables */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 12px 0 24px;
+    font-size: 12.5px;
+    page-break-inside: avoid;
+  }
+  thead tr { background: var(--primary); color: white; }
+  thead th { padding: 9px 12px; text-align: left; font-weight: 600; font-size: 12px; }
+  tbody tr:nth-child(even) { background: #fafafa; }
+  tbody tr:hover { background: var(--primary-light); }
+  td { padding: 8px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  td code { background: transparent; padding: 0; font-size: 11px; }
+
+  /* Section cards */
+  .card {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px 22px;
+    margin: 12px 0 20px;
+    page-break-inside: avoid;
+  }
+  .card h3 { margin-top: 0; }
+
+  /* Badges */
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-size: 10.5px;
+    font-weight: 600;
+  }
+  .badge-orange { background: #fff7ed; color: #c2410c; border: 1px solid #fed7aa; }
+  .badge-blue   { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
+  .badge-green  { background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; }
+  .badge-red    { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
+
+  /* Divider */
+  hr { border: none; border-top: 1px solid var(--border); margin: 36px 0; }
+
+  /* Lists */
+  ul, ol { padding-left: 22px; margin-bottom: 12px; }
+  li { margin: 4px 0; }
+
+  /* Print */
+  @media print {
+    body { padding: 24px 32px; }
+    h1 { page-break-before: always; }
+    h1:first-of-type { page-break-before: avoid; }
+    .cover { page-break-before: avoid; }
+    pre, table { page-break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+
+<!-- COVER -->
+<div class="cover">
+  <div class="logo">JigChat V3</div>
+  <div class="subtitle">Full-Stack Real-Time Chat Application — Technical Documentation</div>
+  <div class="meta">
+    <span>Version 3.0</span>
+    <span>May 2026</span>
+    <span>Node.js · React 19 · PostgreSQL · Redis · Socket.IO</span>
+  </div>
+</div>
+
+<!-- TOC -->
+<div class="toc">
+  <h2>Table of Contents</h2>
+  <ol>
+    <li><a href="#overview">Project Overview</a></li>
+    <li><a href="#tech">Tech Stack</a></li>
+    <li><a href="#architecture">High-Level Architecture</a></li>
+    <li><a href="#database">Database Schema</a></li>
+    <li><a href="#backend">Backend Architecture</a>
+      <ol class="sub">
+        <li><a href="#dir-server">Directory Structure</a></li>
+        <li><a href="#middleware">Middleware Chain</a></li>
+        <li><a href="#api">REST API Reference</a></li>
+        <li><a href="#socket">Socket.IO Events</a></li>
+        <li><a href="#security">Security &amp; Encryption</a></li>
+      </ol>
+    </li>
+    <li><a href="#frontend">Frontend Architecture</a>
+      <ol class="sub">
+        <li><a href="#dir-client">Directory Structure</a></li>
+        <li><a href="#state">State Management</a></li>
+        <li><a href="#components">Component Tree</a></li>
+        <li><a href="#socket-hook">Socket Hook</a></li>
+        <li><a href="#api-client">API Client</a></li>
+      </ol>
+    </li>
+    <li><a href="#workflows">Workflow Diagrams</a></li>
+    <li><a href="#sequences">Sequence Diagrams</a></li>
+    <li><a href="#env">Environment Variables</a></li>
+    <li><a href="#features">Key Features</a></li>
+  </ol>
+</div>
+
+<!-- 1 OVERVIEW -->
+<h1 id="overview">1. Project Overview</h1>
+<p>JigChat V3 is a production-ready, full-stack real-time messaging web application. It supports one-on-one direct messaging, group chats with admin controls, live online presence, typing indicators, and message encryption at rest using AES-256-GCM.</p>
+<table>
+  <thead><tr><th>Capability</th><th>Detail</th></tr></thead>
+  <tbody>
+    <tr><td>Messaging</td><td>1-on-1 DMs and multi-user group chats</td></tr>
+    <tr><td>Real-time</td><td>Socket.IO — messages, typing, presence</td></tr>
+    <tr><td>Encryption</td><td>All message content encrypted at rest (AES-256-GCM)</td></tr>
+    <tr><td>Auth</td><td>JWT + Redis-backed sessions</td></tr>
+    <tr><td>Presence</td><td>Redis TTL keys with 30-second heartbeat</td></tr>
+    <tr><td>UI</td><td>Responsive (desktop + mobile), Tailwind CSS + Radix UI</td></tr>
+  </tbody>
+</table>
+
+<!-- 2 TECH STACK -->
+<h1 id="tech">2. Tech Stack</h1>
+<table>
+  <thead><tr><th>Layer</th><th>Technology</th><th>Version</th></tr></thead>
+  <tbody>
+    <tr><td>Runtime</td><td>Node.js</td><td>v20 (ESNext)</td></tr>
+    <tr><td>Server Framework</td><td>Express</td><td>5.x</td></tr>
+    <tr><td>Real-time</td><td>Socket.IO</td><td>4.x</td></tr>
+    <tr><td>Database</td><td>PostgreSQL + Prisma ORM</td><td>Prisma 7.x</td></tr>
+    <tr><td>Cache / Sessions</td><td>Redis (ioredis)</td><td>5.x</td></tr>
+    <tr><td>Auth</td><td>jsonwebtoken + bcryptjs</td><td>JWT 9.x</td></tr>
+    <tr><td>Encryption</td><td>Node.js crypto (AES-256-GCM)</td><td>built-in</td></tr>
+    <tr><td>Frontend</td><td>React + TypeScript</td><td>React 19</td></tr>
+    <tr><td>Build Tool</td><td>Vite</td><td>6.x</td></tr>
+    <tr><td>Styling</td><td>Tailwind CSS + Radix UI (shadcn)</td><td>Tailwind 4</td></tr>
+    <tr><td>State</td><td>Zustand</td><td>5.x</td></tr>
+    <tr><td>HTTP Client</td><td>Axios</td><td>1.x</td></tr>
+    <tr><td>Routing</td><td>React Router</td><td>v7</td></tr>
+  </tbody>
+</table>
+
+<!-- 3 ARCHITECTURE -->
+<h1 id="architecture">3. High-Level Architecture</h1>
+<pre>
+┌──────────────────────────────────────────────────────────────────────┐
+│                        CLIENT  (Browser)                             │
+│                                                                      │
+│   ┌────────────────┐   ┌──────────────────┐   ┌──────────────────┐  │
+│   │   React UI     │   │  Zustand Stores  │   │  Socket.IO       │  │
+│   │   Components   │◄──│  auth / chat /   │   │  Client          │  │
+│   │                │   │  group / settings│   │  (useSocket)     │  │
+│   └───────┬────────┘   └────────┬─────────┘   └────────┬─────────┘  │
+│           │                     │                       │            │
+│           └─────────────────────┴───────────────────────┘            │
+│                                 │  HTTP REST + WebSocket              │
+└─────────────────────────────────┼────────────────────────────────────┘
+                                  │
+              ┌───────────────────▼──────────────────────┐
+              │          Express Server  :5000            │
+              │                                           │
+              │  ┌──────────────────┐  ┌───────────────┐ │
+              │  │   REST API       │  │  Socket.IO    │ │
+              │  │   /api/*         │  │  Handler      │ │
+              │  └────────┬─────────┘  └───────┬───────┘ │
+              │           │                     │         │
+              │  ┌────────▼─────────────────────▼──────┐ │
+              │  │       Services (Business Logic)      │ │
+              │  │  auth / user / message / group /     │ │
+              │  │  profile / settings                  │ │
+              │  └────────┬───────────────┬─────────────┘ │
+              │           │               │               │
+              └───────────┼───────────────┼───────────────┘
+                          │               │
+               ┌──────────▼───┐   ┌───────▼──────┐
+               │  PostgreSQL  │   │    Redis      │
+               │  (Prisma)    │   │  Sessions:    │
+               │  · users     │   │  session:<id> │
+               │  · messages  │   │  Presence:    │
+               │  · groups    │   │  online:<id>  │
+               │  · settings  │   │  (TTL 90s)    │
+               └──────────────┘   └───────────────┘
+</pre>
+
+<!-- 4 DATABASE -->
+<h1 id="database">4. Database Schema</h1>
+
+<h2>Entity Relationship Diagram</h2>
+<pre>
+┌───────────────┐       ┌────────────────────┐       ┌──────────────┐
+│     users     │       │      messages       │       │    groups    │
+│───────────────│       │────────────────────│       │──────────────│
+│ id (UUID PK)  │◄──────┤ senderId   (FK)    │       │ id (UUID PK) │
+│ name          │       │ receiverId (FK,null)│       │ name         │
+│ email (uniq.) │       │ groupId    (FK,null)├──────►│ description  │
+│ phone (uniq.) │       │ content  (encrypted)│       │ avatarUrl    │
+│ passwordHash  │       │ type  (text/img/sys)│       │ createdBy(FK)│
+│ avatarUrl     │       │ readAt    (nullable) │       │ createdAt    │
+│ bio           │       │ createdAt           │       └──────┬───────┘
+│ lastSeen      │       └────────────────────┘              │
+│ createdAt     │                                   ┌────────▼────────┐
+└───────┬───────┘                                   │  group_members  │
+        │                                           │─────────────────│
+        │  ┌─────────────────┐                      │ groupId  (FK)   │
+        │  │  user_favorites │                      │ userId   (FK)   │
+        │  │─────────────────│                      │ role (admin/mem)│
+        │  │ userId (FK)     │                      │ joinedAt        │
+        │  │ favoriteId (FK) │                      └─────────────────┘
+        ├──┤ createdAt       │
+        │  └─────────────────┘
+        │
+        │  ┌─────────────────┐    ┌───────────────────┐
+        │  │ hidden_contacts │    │   user_settings   │
+        │  │─────────────────│    │───────────────────│
+        │  │ hiderId  (FK)   │    │ userId (PK, FK)   │
+        └──┤ hiddenId (FK)   │    │ lastSeenVisibility│
+           │ createdAt       │    │ onlineVisibility  │
+           └─────────────────┘    │ readReceipts      │
+                                  │ typingIndicators  │
+                                  │ updatedAt         │
+                                  └───────────────────┘
+</pre>
+
+<h2>Model Summary</h2>
+<table>
+  <thead><tr><th>Model</th><th>Primary Key</th><th>Key Fields</th></tr></thead>
+  <tbody>
+    <tr><td><code>User</code></td><td>UUID</td><td>name, email?, phone?, passwordHash, avatarUrl, bio, lastSeen</td></tr>
+    <tr><td><code>Message</code></td><td>UUID</td><td>senderId, receiverId?, groupId?, content (AES encrypted), type, readAt</td></tr>
+    <tr><td><code>Group</code></td><td>UUID</td><td>name, description, avatarUrl, createdBy</td></tr>
+    <tr><td><code>GroupMember</code></td><td>(groupId, userId)</td><td>role: admin|member, joinedAt</td></tr>
+    <tr><td><code>Favorite</code></td><td>(userId, favoriteId)</td><td>createdAt</td></tr>
+    <tr><td><code>HiddenContact</code></td><td>(hiderId, hiddenId)</td><td>createdAt</td></tr>
+    <tr><td><code>UserSettings</code></td><td>userId</td><td>lastSeenVisibility, onlineVisibility, readReceipts, typingIndicators</td></tr>
+  </tbody>
+</table>
+
+<!-- 5 BACKEND -->
+<h1 id="backend">5. Backend Architecture</h1>
+
+<h2 id="dir-server">5.1 Directory Structure</h2>
+<pre>
+server/
+├── src/
+│   ├── server.ts                   # Express + Socket.IO bootstrap (port 5000)
+│   ├── controllers/
+│   │   ├── auth.controller.ts      # login, logout
+│   │   ├── user.controller.ts      # list users, get by id, favorite, hide
+│   │   ├── message.controller.ts   # DM history, group history, search, delete
+│   │   ├── group.controller.ts     # CRUD groups, add/remove members
+│   │   ├── profile.controller.ts   # view/edit profile, change password
+│   │   └── settings.controller.ts  # get/patch user settings
+│   ├── services/                   # Business logic — called by controllers
+│   │   ├── auth.service.ts
+│   │   ├── user.service.ts
+│   │   ├── message.service.ts
+│   │   ├── group.service.ts
+│   │   ├── profile.service.ts
+│   │   └── settings.service.ts
+│   ├── routes/                     # Express Router definitions
+│   │   ├── auth.routes.ts
+│   │   ├── user.routes.ts
+│   │   ├── message.routes.ts
+│   │   ├── group.routes.ts
+│   │   ├── profile.routes.ts
+│   │   └── settings.routes.ts
+│   ├── middleware/
+│   │   ├── auth.middleware.ts      # JWT verify + Redis session check
+│   │   └── error.middleware.ts     # Global error handler → 500
+│   ├── socket/
+│   │   ├── socket.handler.ts       # send_message, send_group_message, typing
+│   │   ├── socket.rooms.ts         # join_room, disconnect
+│   │   └── socket.auth.ts          # handshake JWT verification
+│   └── lib/
+│       ├── prisma.ts               # PrismaClient singleton (pg adapter)
+│       ├── redis.ts                # ioredis singleton
+│       ├── io.ts                   # Socket.IO singleton getter/setter
+│       └── crypto.ts               # AES-256-GCM encrypt / decrypt
+└── prisma/
+    └── schema.prisma
+</pre>
+
+<h2 id="middleware">5.2 Middleware Chain</h2>
+<pre>
+Incoming Request
+       │
+       ▼
+  cors()           — allow all origins (configurable via CLIENT_URL)
+       │
+       ▼
+  express.json()   — parse JSON body
+       │
+       ▼
+  Route match
+  ├── /api/auth/*  ──────────────────────► Controller (no auth)
+  │
+  └── /api/*       ──► authMiddleware
+                           │
+                           ├─ Extract  Authorization: Bearer &lt;token&gt;
+                           ├─ jwt.verify(token, JWT_SECRET)
+                           ├─ redis.get(`session:${userId}`) — must exist
+                           ├─ req.userId = userId
+                           │
+                           └─ 401 if any check fails
+                                    │
+                                    ▼
+                            Controller → Service → Prisma / Redis
+                                    │
+                                    ▼
+                            errorMiddleware  →  500 JSON
+</pre>
+
+<h2 id="api">5.3 REST API Reference</h2>
+
+<h3>Authentication</h3>
+<table>
+  <thead><tr><th>Method</th><th>Path</th><th>Auth</th><th>Body</th><th>Response</th></tr></thead>
+  <tbody>
+    <tr><td>POST</td><td><code>/api/auth/login</code></td><td>No</td><td><code>{ email, password }</code></td><td><code>{ user, token }</code></td></tr>
+    <tr><td>POST</td><td><code>/api/auth/logout</code></td><td>Yes</td><td>—</td><td><code>{ message }</code></td></tr>
+  </tbody>
+</table>
+
+<h3>Users</h3>
+<table>
+  <thead><tr><th>Method</th><th>Path</th><th>Query / Body</th><th>Response</th></tr></thead>
+  <tbody>
+    <tr><td>GET</td><td><code>/api/users</code></td><td><code>?currentUserId &amp; filter</code></td><td>User[] with status, unread, isFavorite</td></tr>
+    <tr><td>GET</td><td><code>/api/users/:id</code></td><td>—</td><td>Public profile (name, avatar, bio, isOnline)</td></tr>
+    <tr><td>POST</td><td><code>/api/users/favorite</code></td><td><code>{ userId, favoriteId }</code></td><td><code>{ isFavorite: boolean }</code></td></tr>
+    <tr><td>POST</td><td><code>/api/users/hide</code></td><td><code>{ hiddenId }</code></td><td><code>{ message }</code></td></tr>
+  </tbody>
+</table>
+
+<h3>Messages</h3>
+<table>
+  <thead><tr><th>Method</th><th>Path</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td>GET</td><td><code>/api/messages/:senderId/:receiverId</code></td><td>Full DM history (decrypted, ordered by createdAt asc)</td></tr>
+    <tr><td>GET</td><td><code>/api/messages/group/:groupId</code></td><td>Group history with sender name + avatar</td></tr>
+    <tr><td>POST</td><td><code>/api/messages/mark-read</code></td><td>Sets readAt on all unread messages from sender</td></tr>
+    <tr><td>DELETE</td><td><code>/api/messages/:messageId</code></td><td>Sender-only delete; broadcasts message_deleted via Socket</td></tr>
+    <tr><td>GET</td><td><code>/api/messages/search?q=&amp;currentUserId=</code></td><td>ILIKE search — top 5 contacts + top 8 message matches</td></tr>
+  </tbody>
+</table>
+
+<h3>Groups</h3>
+<table>
+  <thead><tr><th>Method</th><th>Path</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td>POST</td><td><code>/api/groups</code></td><td>Create group with name, description, memberIds (creator = admin)</td></tr>
+    <tr><td>GET</td><td><code>/api/groups?userId=</code></td><td>All groups user is a member of, sorted by createdAt desc</td></tr>
+    <tr><td>GET</td><td><code>/api/groups/:groupId</code></td><td>Single group with full member details</td></tr>
+    <tr><td>PUT</td><td><code>/api/groups/:groupId</code></td><td>Admin only — update name / description</td></tr>
+    <tr><td>POST</td><td><code>/api/groups/:groupId/members</code></td><td>Admin only — add member; broadcasts member_added socket event</td></tr>
+    <tr><td>DELETE</td><td><code>/api/groups/:groupId/members/:userId</code></td><td>Admin or self — remove member; broadcasts removal events</td></tr>
+  </tbody>
+</table>
+
+<h3>Profile &amp; Settings</h3>
+<table>
+  <thead><tr><th>Method</th><th>Path</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td>GET</td><td><code>/api/profile</code></td><td>Current user full profile</td></tr>
+    <tr><td>PUT</td><td><code>/api/profile</code></td><td>Update name, bio, avatarUrl</td></tr>
+    <tr><td>PUT</td><td><code>/api/profile/password</code></td><td>Change password (bcrypt 12 rounds)</td></tr>
+    <tr><td>GET</td><td><code>/api/settings/:userId</code></td><td>Get or create default UserSettings</td></tr>
+    <tr><td>PATCH</td><td><code>/api/settings/:userId</code></td><td>Update any settings field (visibility, receipts, typing)</td></tr>
+  </tbody>
+</table>
+
+<h2 id="socket">5.4 Socket.IO Events</h2>
+
+<h3>Client → Server</h3>
+<table>
+  <thead><tr><th>Event</th><th>Payload</th><th>Server Action</th></tr></thead>
+  <tbody>
+    <tr><td><code>join_room</code></td><td>—</td><td>SET online:&lt;id&gt; EX 90, join group rooms, broadcast user_online</td></tr>
+    <tr><td><code>join_group_room</code></td><td><code>groupId</code></td><td>socket.join("group:&lt;id&gt;")</td></tr>
+    <tr><td><code>send_message</code></td><td><code>{ senderId, receiverId, content, type }</code></td><td>Encrypt, INSERT, broadcast receive_message to both</td></tr>
+    <tr><td><code>send_group_message</code></td><td><code>{ senderId, groupId, content, type }</code></td><td>Verify member, encrypt, INSERT, broadcast to room</td></tr>
+    <tr><td><code>typing</code></td><td><code>{ senderId, receiverId }</code></td><td>Forward user_typing to receiver</td></tr>
+    <tr><td><code>stop_typing</code></td><td><code>{ senderId, receiverId }</code></td><td>Forward user_stop_typing to receiver</td></tr>
+  </tbody>
+</table>
+
+<h3>Server → Client</h3>
+<table>
+  <thead><tr><th>Event</th><th>Payload</th><th>Triggered By</th></tr></thead>
+  <tbody>
+    <tr><td><code>receive_message</code></td><td>Message (decrypted)</td><td>New DM — sent to both participants</td></tr>
+    <tr><td><code>receive_group_message</code></td><td>Message + sender info</td><td>New group message — broadcast to room</td></tr>
+    <tr><td><code>message_deleted</code></td><td><code>{ messageId }</code></td><td>Message deletion by sender</td></tr>
+    <tr><td><code>user_online</code></td><td><code>userId</code></td><td>User connects / heartbeat</td></tr>
+    <tr><td><code>user_offline</code></td><td><code>{ userId, lastSeen }</code></td><td>User disconnects</td></tr>
+    <tr><td><code>user_typing</code></td><td><code>userId</code></td><td>Typing event forwarded</td></tr>
+    <tr><td><code>user_stop_typing</code></td><td><code>userId</code></td><td>Stop typing forwarded</td></tr>
+    <tr><td><code>member_added</code></td><td><code>{ group, systemMessage }</code></td><td>Sent to newly added user</td></tr>
+    <tr><td><code>member_removed</code></td><td><code>{ groupId, userId }</code></td><td>Sent to removed user</td></tr>
+    <tr><td><code>group_member_removed</code></td><td><code>{ groupId, userId }</code></td><td>Sent to remaining members</td></tr>
+    <tr><td><code>group_send_error</code></td><td><code>{ groupId, message }</code></td><td>Non-member tried to send</td></tr>
+  </tbody>
+</table>
+
+<h3>Redis Key Patterns</h3>
+<table>
+  <thead><tr><th>Key</th><th>Value</th><th>TTL</th><th>Purpose</th></tr></thead>
+  <tbody>
+    <tr><td><code>session:&lt;userId&gt;</code></td><td>JWT token</td><td>7 days</td><td>Active session — deleted on logout</td></tr>
+    <tr><td><code>online:&lt;userId&gt;</code></td><td>"1"</td><td>90 seconds</td><td>Online presence — refreshed every 30s</td></tr>
+  </tbody>
+</table>
+
+<h2 id="security">5.5 Security &amp; Encryption</h2>
+<pre>
+Password Storage
+  bcryptjs · 12 rounds · one-way hash stored as password_hash
+
+JWT Tokens
+  Algorithm : HS256
+  Expiry    : 7 days
+  Validated : jwt.verify() + redis.get(`session:&lt;id&gt;`) must exist
+  Logout    : DEL session:&lt;id&gt; in Redis → token immediately invalid
+
+Message Encryption (AES-256-GCM)
+  Key       : 32 bytes from ENCRYPTION_KEY env var
+  IV        : 12 bytes (random per message)
+  Auth tag  : 16 bytes
+  Format    : "ENC:&lt;iv_b64&gt;:&lt;tag_b64&gt;:&lt;ciphertext_b64&gt;"
+  Legacy    : Graceful fallback — plaintext returned if not ENC: prefixed
+
+Socket Authentication
+  JWT required in socket.handshake.auth.token before any events accepted
+
+Group Authorization
+  GroupMember.role = 'admin' | 'member'
+  Admin-only: update group info, add member, remove other members
+  Self: any member can remove themselves
+</pre>
+
+<!-- 6 FRONTEND -->
+<h1 id="frontend">6. Frontend Architecture</h1>
+
+<h2 id="dir-client">6.1 Directory Structure</h2>
+<pre>
+frontend/src/
+├── main.tsx                        # ReactDOM root
+├── App.tsx                         # Routes: /login  /chat  / (redirect)
+├── pages/
+│   ├── LoginPage.tsx               # Email + password form → POST /auth/login
+│   └── ChatPage.tsx                # Main layout orchestrator
+├── components/
+│   ├── chat/
+│   │   ├── TopHeader.tsx           # Search + settings / profile buttons
+│   │   ├── SidebarHeader.tsx       # Tab filter (All/Unread/Favorites/Groups)
+│   │   ├── ContactList.tsx         # User + group list, unread badges
+│   │   ├── ChatHeader.tsx          # Active chat: avatar, status, actions
+│   │   ├── MessageList.tsx         # Scrollable thread, date separators
+│   │   ├── MessageInput.tsx        # Textarea + emoji + typing emit
+│   │   ├── SearchBar.tsx           # Global search (contacts + messages)
+│   │   ├── UserProfilePanel.tsx    # Right-side slide-in profile panel
+│   │   └── WelcomeScreen.tsx       # Empty state when no chat selected
+│   ├── groups/
+│   │   └── GroupModal.tsx          # Create / edit group + member management
+│   ├── profile/
+│   │   └── ProfileModal.tsx        # Edit profile, change password
+│   ├── settings/
+│   │   └── SettingsModal.tsx       # Privacy toggles (visibility, receipts)
+│   └── shared/
+│       ├── Avatar.tsx              # Image with initials fallback
+│       ├── AvatarViewer.tsx        # Fullscreen viewer: zoom + pan + reset
+│       ├── Button.tsx              # default / ghost / outline variants
+│       ├── Dialog.tsx              # Modal wrapper
+│       ├── Input.tsx               # Styled text input
+│       ├── Textarea.tsx            # Multi-line input
+│       ├── Switch.tsx              # Toggle
+│       └── Dropdown.tsx            # Menu
+├── store/
+│   ├── authStore.ts                # user · isAuthenticated · token (persisted)
+│   ├── chatStore.ts                # messages · users · selectedUser · UI state
+│   ├── groupStore.ts               # groups · modal state · favorites
+│   └── settingsStore.ts            # UserSettings
+├── hooks/
+│   └── useSocket.ts                # Singleton socket + all event handlers
+├── api/
+│   ├── client.ts                   # Axios instance + auth interceptor
+│   └── settings.ts                 # Settings fetch/update helpers
+└── types/
+    └── index.ts                    # User · Message · Group · UserSettings
+</pre>
+
+<h2 id="state">6.2 State Management (Zustand)</h2>
+<pre>
+┌─────────────────────────────────────────────────────────┐
+│  authStore                        [localStorage persist] │
+│  ─────────────────────────────────────────────────────  │
+│  user · isAuthenticated · token                         │
+│  login() · logout() · updateUser() · clearAuth()        │
+└─────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────┐
+│  chatStore                                              │
+│  ─────────────────────────────────────────────────────  │
+│  users[]            — contact list with status          │
+│  messages[]         — active DM thread                  │
+│  groupMessages[]    — active group thread               │
+│  selectedUser       — current DM partner                │
+│  selectedGroup      — current group                     │
+│  groupUnreadCounts  — { groupId: number }               │
+│  groupLastMessages  — { groupId: { content, createdAt } }│
+│  profilePanelUser   — user shown in right panel         │
+│  highlightedMsgId   — flash-highlight from search jump  │
+│  activeTab          — All / Unread / Favorites / Groups │
+│  isSettingsOpen · isProfileOpen                         │
+└─────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────┐
+│  groupStore                                             │
+│  ─────────────────────────────────────────────────────  │
+│  groups[]           — user's group list                 │
+│  isModalOpen        — GroupModal visibility             │
+│  editingGroup       — group being edited in modal       │
+│  favoriteGroupIds[] — client-side starred groups        │
+└─────────────────────────────────────────────────────────┘
+</pre>
+
+<h2 id="components">6.3 Component Tree</h2>
+<pre>
+App
+└── ChatPage
+    ├── TopHeader
+    │   └── SearchBar ── contacts + message search results
+    ├── Sidebar
+    │   ├── SidebarHeader ── tab filter
+    │   └── ContactList
+    │       ├── "Saved Messages" (self-chat)
+    │       ├── User rows  (avatar · name · last msg · unread badge)
+    │       └── Group rows (icon · name · last msg · unread badge)
+    ├── Chat Area
+    │   ├── ChatHeader (avatar | name | online status | action buttons)
+    │   │   └── [click avatar/name] → setProfilePanelUser()
+    │   ├── Content Row
+    │   │   ├── MessageList
+    │   │   │   ├── DateSeparator
+    │   │   │   ├── SystemMessage pill
+    │   │   │   └── Message bubble (sent / received)
+    │   │   │       └── sender avatar + name (group, clickable)
+    │   │   │           └── [click] → setProfilePanelUser()
+    │   │   ├── MessageInput (textarea · emoji · send · typing emit)
+    │   │   └── UserProfilePanel [conditional right column]
+    │   │       ├── avatar [click] → AvatarViewer (fullscreen)
+    │   │       │   └── ZoomIn · ZoomOut · Reset · Drag-to-pan
+    │   │       ├── name · online status
+    │   │       └── bio · email · phone (if available)
+    │   └── WelcomeScreen (no active chat)
+    ├── SettingsModal
+    ├── ProfileModal
+    └── GroupModal
+</pre>
+
+<h2 id="socket-hook">6.4 Socket Hook (useSocket)</h2>
+<pre>
+useSocket()  ← called once in ChatPage
+  │
+  ├── Creates singleton Socket.IO client (persists across re-renders)
+  │   URL: VITE_SOCKET_URL
+  │   Auth: { token } in handshake
+  │   Reconnection: 5 attempts · 1s delay · websocket + polling
+  │
+  ├── On connect: emit join_room
+  │
+  ├── Heartbeat: emit join_room every 30 seconds
+  │   (refreshes Redis online:&lt;id&gt; TTL before it expires at 90s)
+  │
+  ├── Inbound event handlers:
+  │   receive_message        → addMessage() · markAsRead() · bumpUserToTop()
+  │   receive_group_message  → addGroupMessage() · bumpGroupLastMessage()
+  │   message_deleted        → removeMessage()
+  │   member_added           → addGroupLocally() · join socket room
+  │   member_removed         → removeGroupLocally()
+  │   group_member_removed   → removeMemberLocally() · update selectedGroup
+  │   user_online            → updateUserStatus(id, true)
+  │   user_offline           → updateUserStatus(id, false, lastSeen)
+  │   user_typing            → updateUserTypingStatus(id, true)
+  │   user_stop_typing       → updateUserTypingStatus(id, false)
+  │
+  └── Outbound helpers:
+      sendMessage(receiverId, content)      → emit send_message
+      sendGroupMessage(groupId, content)    → emit send_group_message
+      emitTyping(receiverId)                → emit typing (auto-stop 2s)
+      emitStopTyping(receiverId)            → emit stop_typing
+</pre>
+
+<h2 id="api-client">6.5 API Client</h2>
+<pre>
+Axios instance  (baseURL = VITE_API_BASE_URL)
+  │
+  ├── Request interceptor
+  │   authStore.getState().token
+  │   → set  Authorization: Bearer &lt;token&gt;
+  │
+  └── Response interceptor
+      on 401 → authStore.clearAuth() → redirect to "/"
+</pre>
+
+<!-- 7 WORKFLOWS -->
+<h1 id="workflows">7. Workflow Diagrams</h1>
+
+<h2>7.1 Authentication Flow</h2>
+<pre>
+Browser opens app
+        │
+        ▼
+  authStore.isAuthenticated?
+  ├── true  ──────────────────────────► /chat
+  └── false ──► /login
+                    │  enter email + password
+                    ▼
+              POST /api/auth/login
+                    │
+                    ▼
+              Server:
+              1. SELECT user WHERE email = ?
+              2. bcrypt.compare(password, passwordHash)
+              3. jwt.sign({ userId }, JWT_SECRET, { expiresIn: '7d' })
+              4. redis.set(`session:${id}`, token, 'EX', 604800)
+                    │
+                    ▼  { user, token }
+              authStore.login(user, token)
+              ── persisted to localStorage ──
+                    │
+                    ▼
+              navigate → /chat
+</pre>
+
+<h2>7.2 Direct Message Flow</h2>
+<pre>
+User A selects User B
+        │
+        ▼
+GET /api/messages/:A/:B  →  messages[] in chatStore
+        │
+        ▼
+User A types
+  ├── emit "typing" → server → emit "user_typing" to B
+  └── auto emit "stop_typing" after 2 seconds of no keys
+        │
+        ▼
+User A presses Enter
+        │
+emit "send_message" { senderId:A, receiverId:B, content }
+        │
+        ▼
+  Server:
+  1. AES-256-GCM encrypt content
+  2. INSERT into messages
+  3. Un-hide contact if previously hidden
+  4. emit "receive_message" → User A + User B
+        │
+  ┌─────┴─────┐
+  ▼           ▼
+User A      User B
+addMessage()  └── Active chat with A?
+                  ├── YES → addMessage() + POST mark-read
+                  └── NO  → incrementUnreadCount(A)
+                            bumpUserToTop(A)
+</pre>
+
+<h2>7.3 Group Message Flow</h2>
+<pre>
+Admin creates group
+  POST /api/groups { name, memberIds }
+        │ creates GroupMember rows (creator = admin)
+        │
+  emit "join_group_room" groupId
+        │ all members socket.join("group:&lt;id&gt;")
+        │
+        ▼
+Member sends message
+  emit "send_group_message" { senderId, groupId, content }
+        │
+        ▼
+  Server:
+  1. Verify sender is GroupMember
+  2. AES-256-GCM encrypt
+  3. INSERT into messages
+  4. emit "receive_group_message" to room "group:&lt;id&gt;"
+        │
+        ▼
+All room members receive:
+  ├── Active in group → addGroupMessage()
+  └── Elsewhere      → incrementGroupUnreadCount()
+                       bumpGroupLastMessage()
+</pre>
+
+<h2>7.4 Online Presence Flow</h2>
+<pre>
+Socket connects
+        │ emit "join_room"
+        ▼
+  Server:
+  redis.set(`online:${id}`, "1", "EX", 90)
+  socket.join all group rooms
+  emit "user_online" id → all sockets
+
+  ─── every 30 seconds ───────────────
+  Client re-emits "join_room"
+  Server: redis.set(`online:${id}`, "1", "EX", 90)   ← refresh TTL
+
+  ─── on disconnect ──────────────────
+  Server:
+  redis.del(`online:${id}`)
+  UPDATE users SET lastSeen = now() WHERE id = ?
+  emit "user_offline" { id, lastSeen } → all sockets
+
+All clients: updateUserStatus(id, false, lastSeen)
+</pre>
+
+<h2>7.5 Search Flow</h2>
+<pre>
+User types in SearchBar
+        │ (debounced)
+        ▼
+GET /api/messages/search?q=term&currentUserId=id
+        │
+        ▼
+  Server:
+  ├── Users:    SELECT WHERE name ILIKE '%term%' LIMIT 5
+  └── Messages: SELECT content LIKE '%term%' ... LIMIT 8
+        │
+        ▼
+Results in UI:
+  ├── Contact match → ensureUserInList() → setSelectedUser()
+  └── Message match → setSelectedUser/Group()
+                      setHighlightedMessageId()
+                      MessageList scrolls + flashes yellow
+</pre>
+
+<!-- 8 SEQUENCES -->
+<h1 id="sequences">8. Sequence Diagrams</h1>
+
+<h2>8.1 Login Sequence</h2>
+<pre>
+Browser          Express            PostgreSQL          Redis
+   │                 │                  │                 │
+   │── POST /login ─►│                  │                 │
+   │                 │── findUnique ────►│                 │
+   │                 │◄── user row ──────│                 │
+   │                 │                  │                 │
+   │                 │── bcrypt.compare()── (local) ──────│
+   │                 │                  │                 │
+   │                 │── jwt.sign() ──── (local)          │
+   │                 │                  │                 │
+   │                 │── SET session:id, token, EX 604800 ►│
+   │                 │◄── OK ────────────────────────────  │
+   │                 │                  │                 │
+   │◄── { user, token } ────────────────│                 │
+   │  store in authStore + localStorage │                 │
+</pre>
+
+<h2>8.2 Send DM Sequence</h2>
+<pre>
+UserA Browser     Socket.IO Server      PostgreSQL       UserB Browser
+     │                   │                  │                  │
+     │─ send_message ───►│                  │                  │
+     │                   │─ AES encrypt ─── (local)            │
+     │                   │─ INSERT ─────────►│                  │
+     │                   │◄─ row ────────────│                  │
+     │                   │─ AES decrypt ─── (local)            │
+     │                   │                  │                  │
+     │◄─ receive_message ─│                  │                  │
+     │  addMessage()      │─ receive_message ─────────────────►│
+     │                   │                  │       if active chat:
+     │                   │◄── POST mark-read ──────────────────│
+     │                   │─ UPDATE readAt ──►│                  │
+</pre>
+
+<h2>8.3 Group Message Sequence</h2>
+<pre>
+Sender Browser    Socket.IO Server     PostgreSQL     All Members' Browsers
+     │                  │                  │                   │
+     │─send_group_msg──►│                  │                   │
+     │                  │─ verify member ──►│                   │
+     │                  │◄─ member row ─────│                   │
+     │                  │─ encrypt ──────── (local)             │
+     │                  │─ INSERT ─────────►│                   │
+     │                  │◄─ row ────────────│                   │
+     │                  │─ decrypt ──────── (local)             │
+     │◄─ receive_group_message              │                   │
+     │                  │─── emit to room "group:&lt;id&gt;" ────────►│
+     │                  │                  │       addGroupMessage()
+     │                  │                  │    or incrementUnread()
+</pre>
+
+<h2>8.4 Socket Connection &amp; Heartbeat</h2>
+<pre>
+Browser               Socket.IO Server              Redis
+   │                        │                         │
+   │── connect (JWT) ───────►│                         │
+   │                        │── verify JWT ─── (local) │
+   │                        │                         │
+   │── emit join_room ───────►│                        │
+   │                        │── SET online:&lt;id&gt; EX 90 ►│
+   │                        │── join group rooms        │
+   │                        │── emit user_online ──► all│
+   │                        │                         │
+   │ ┌── every 30 seconds ──┐│                         │
+   │ │  emit join_room      │►│── SET online:&lt;id&gt; EX 90►│ (refresh)
+   │ └──────────────────────┘│                         │
+   │                        │                         │
+   │── disconnect ───────────►│                        │
+   │                        │── DEL online:&lt;id&gt; ───────►│
+   │                        │── UPDATE lastSeen ───► DB │
+   │                        │── emit user_offline ──► all
+</pre>
+
+<h2>8.5 Delete Message Sequence</h2>
+<pre>
+Sender Browser     Express /messages/:id     PostgreSQL      Participants
+     │                     │                     │                │
+     │─ DELETE /messages/id►│                     │                │
+     │                     │─ findUnique ─────────►│               │
+     │                     │◄─ verify senderId ────│               │
+     │                     │─ delete ─────────────►│               │
+     │◄─ 200 OK ────────────│                     │                │
+     │                     │─ io.emit message_deleted ─────────────►│
+     │                     │    (room or DM pair) │    removeMessage()
+</pre>
+
+<h2>8.6 Add Group Member Sequence</h2>
+<pre>
+Admin Browser    Express /groups/:id/members   Socket.IO    New Member Browser
+     │                     │                      │               │
+     │── POST /members ────►│                      │               │
+     │   { userId }         │── verify admin ───► DB              │
+     │                     │── INSERT GroupMember►DB              │
+     │                     │── fetch group ──────►DB              │
+     │                     │── save system msg ──►DB              │
+     │◄─ GroupMember ───────│                      │               │
+     │                     │── emit member_added ──────────────────►│
+     │                     │   { group, systemMsg }│  addGroupLocally()
+     │                     │── emit receive_group_message           │
+     │                     │   to room "group:&lt;id&gt;"── to all mbrs ►│
+</pre>
+
+<!-- 9 ENV -->
+<h1 id="env">9. Environment Variables</h1>
+
+<h3>Server — <code>server/.env</code></h3>
+<table>
+  <thead><tr><th>Variable</th><th>Example</th><th>Required</th></tr></thead>
+  <tbody>
+    <tr><td><code>PORT</code></td><td>5000</td><td>No (default 5000)</td></tr>
+    <tr><td><code>DATABASE_URL</code></td><td>postgresql://user:pw@localhost:5432/jigchat</td><td>Yes</td></tr>
+    <tr><td><code>REDIS_URL</code></td><td>redis://localhost:6379</td><td>No (default shown)</td></tr>
+    <tr><td><code>JWT_SECRET</code></td><td>long-random-string</td><td>Yes</td></tr>
+    <tr><td><code>ENCRYPTION_KEY</code></td><td>64-char hex (32 bytes)</td><td>Yes</td></tr>
+  </tbody>
+</table>
+
+<h3>Frontend — <code>frontend/.env</code></h3>
+<table>
+  <thead><tr><th>Variable</th><th>Example</th><th>Required</th></tr></thead>
+  <tbody>
+    <tr><td><code>VITE_API_BASE_URL</code></td><td>http://localhost:5000/api</td><td>No (default shown)</td></tr>
+    <tr><td><code>VITE_SOCKET_URL</code></td><td>http://localhost:5000</td><td>No (default shown)</td></tr>
+  </tbody>
+</table>
+
+<!-- 10 FEATURES -->
+<h1 id="features">10. Key Features</h1>
+<table>
+  <thead><tr><th>Feature</th><th>Implementation</th></tr></thead>
+  <tbody>
+    <tr><td>Real-time DM</td><td>Socket.IO <code>send_message</code> / <code>receive_message</code></td></tr>
+    <tr><td>Real-time group chat</td><td>Socket.IO rooms (<code>group:&lt;id&gt;</code>)</td></tr>
+    <tr><td>Message encryption</td><td>AES-256-GCM at rest, decrypted on every fetch</td></tr>
+    <tr><td>Online presence</td><td>Redis key with 90s TTL, refreshed by 30s heartbeat</td></tr>
+    <tr><td>Typing indicators</td><td><code>typing</code> / <code>stop_typing</code> events with 2s auto-stop</td></tr>
+    <tr><td>Unread badges</td><td>Per-user and per-group counters in Zustand</td></tr>
+    <tr><td>Read receipts</td><td><code>readAt</code> DB column + <code>mark-read</code> endpoint</td></tr>
+    <tr><td>Favorites</td><td><code>user_favorites</code> table, toggled via REST</td></tr>
+    <tr><td>Hidden contacts</td><td><code>hidden_contacts</code> table, auto-cleared on DM</td></tr>
+    <tr><td>Group management</td><td>Admin role in <code>group_members</code>, Socket broadcasts on changes</td></tr>
+    <tr><td>Search</td><td>ILIKE query on users + messages, scroll + highlight in thread</td></tr>
+    <tr><td>Message deletion</td><td>Sender-only; <code>message_deleted</code> broadcast to all parties</td></tr>
+    <tr><td>Profile panel</td><td>Right-side slide-in on avatar / name click</td></tr>
+    <tr><td>Fullscreen avatar viewer</td><td>Zoom, pan, reset via <code>AvatarViewer</code> component</td></tr>
+    <tr><td>Session security</td><td>Redis-backed JWT invalidation — logout is instant</td></tr>
+    <tr><td>Responsive layout</td><td>Tailwind breakpoints; sidebar hides on mobile</td></tr>
+  </tbody>
+</table>
+
+<hr />
+<p style="text-align:center; color: #94a3b8; font-size: 11px; margin-top: 32px;">
+  JigChat V3 · Technical Documentation · Generated May 2026
+</p>
+
+</body>
+</html>
