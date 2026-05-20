@@ -31,11 +31,13 @@ export const setupSocketHandlers = (io: Server) => {
         console.log(`✅ Message saved to DB: ${message.id}`);
         // Un-hide the receiver if the sender previously removed them
         if (senderId !== receiverId) {
-          await prisma.$executeRaw`
-            DELETE FROM "HiddenContact"
-            WHERE "hiderId" = ${senderId}
-              AND "hiddenId" = ${receiverId}
-          `;
+          try {
+            await prisma.hiddenContact.deleteMany({
+              where: { hiderId: senderId, hiddenId: receiverId },
+            });
+          } catch {
+            // non-critical cleanup, don't block message delivery
+          }
           io.to(receiverId).emit('receive_message', message);
         }
         io.to(senderId).emit('receive_message', message);

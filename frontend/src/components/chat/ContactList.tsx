@@ -22,7 +22,7 @@ export const ContactList: React.FC = () => {
   } = useChatStore();
   const [hoveredUserId, setHoveredUserId] = useState<string | null>(null);
   const { user: currentUser } = useAuthStore();
-  const { groups, setIsModalOpen, favoriteGroupIds, toggleGroupFavorite } = useGroupStore();
+  const { groups, setIsModalOpen, toggleGroupFavorite } = useGroupStore();
 
   const filteredUsers = useMemo(() => {
     switch (activeTab) {
@@ -42,11 +42,11 @@ export const ContactList: React.FC = () => {
       case "Unread":
         return groups.filter((g) => (groupUnreadCounts[g.id] || 0) > 0);
       case "Favorites":
-        return groups.filter((g) => favoriteGroupIds.includes(g.id));
+        return groups.filter((g) => g.isFavorite);
       default:
         return groups;
     }
-  }, [groups, activeTab, groupUnreadCounts, favoriteGroupIds]);
+  }, [groups, activeTab, groupUnreadCounts]);
 
   const items = useMemo<ListItem[]>(() => {
     const userItems: ListItem[] = filteredUsers.map((u) => ({ kind: "user", data: u }));
@@ -55,7 +55,7 @@ export const ContactList: React.FC = () => {
       data: g,
       lastMessage: groupLastMessages[g.id],
       unreadCount: groupUnreadCounts[g.id] || 0,
-      isFavorite: favoriteGroupIds.includes(g.id),
+      isFavorite: !!g.isFavorite,
     }));
     return [...userItems, ...groupItems].sort((a, b) => {
       const tA = a.kind === "user"
@@ -66,7 +66,7 @@ export const ContactList: React.FC = () => {
         : (b.lastMessage?.createdAt ? new Date(b.lastMessage.createdAt).getTime() : 0);
       return tB - tA;
     });
-  }, [filteredUsers, filteredGroups, groupLastMessages, groupUnreadCounts, favoriteGroupIds]);
+  }, [filteredUsers, filteredGroups, groupLastMessages, groupUnreadCounts]);
 
   if (items.length === 0) {
     return (
@@ -247,7 +247,7 @@ export const ContactList: React.FC = () => {
                     type="button"
                     onClick={(e) => {
                       e.stopPropagation();
-                      toggleGroupFavorite(group.id);
+                      toggleGroupFavorite(currentUser!.id, group.id);
                     }}
                     className="p-1.5 rounded-xl text-slate-300 hover:text-yellow-400 hover:bg-yellow-50 transition-colors"
                     title={item.isFavorite ? "Remove from favorites" : "Add to favorites"}

@@ -9,7 +9,6 @@ interface GroupState {
   isLoading: boolean;
   isModalOpen: boolean;
   editingGroup: Group | null;
-  favoriteGroupIds: string[];
 
   setIsModalOpen: (open: boolean, group?: Group | null) => void;
   fetchGroups: (userId: string) => Promise<void>;
@@ -20,7 +19,7 @@ interface GroupState {
   removeGroupLocally: (groupId: string) => void;
   addGroupLocally: (group: Group) => void;
   removeMemberLocally: (groupId: string, userId: string) => void;
-  toggleGroupFavorite: (groupId: string) => void;
+  toggleGroupFavorite: (userId: string, groupId: string) => Promise<void>;
 }
 
 export const useGroupStore = create<GroupState>((set) => ({
@@ -28,7 +27,6 @@ export const useGroupStore = create<GroupState>((set) => ({
   isLoading: false,
   isModalOpen: false,
   editingGroup: null,
-  favoriteGroupIds: [],
 
   setIsModalOpen: (open, group = null) =>
     set({ isModalOpen: open, editingGroup: open ? group ?? null : null }),
@@ -85,11 +83,31 @@ export const useGroupStore = create<GroupState>((set) => ({
       : [group, ...state.groups],
   })),
 
-  toggleGroupFavorite: (groupId) => set((state) => ({
-    favoriteGroupIds: state.favoriteGroupIds.includes(groupId)
-      ? state.favoriteGroupIds.filter((id) => id !== groupId)
-      : [...state.favoriteGroupIds, groupId],
-  })),
+  toggleGroupFavorite: async (userId, groupId) => {
+    // Optimistic update
+    set((state) => ({
+      groups: state.groups.map((g) =>
+        g.id === groupId ? { ...g, isFavorite: !g.isFavorite } : g,
+      ),
+    }));
+    try {
+      const res = await apiClient.post('/groups/favorite', { userId, groupId });
+      const { isFavorite } = res.data;
+      set((state) => ({
+        groups: state.groups.map((g) =>
+          g.id === groupId ? { ...g, isFavorite } : g,
+        ),
+      }));
+    } catch (error) {
+      // Revert on failure
+      set((state) => ({
+        groups: state.groups.map((g) =>
+          g.id === groupId ? { ...g, isFavorite: !g.isFavorite } : g,
+        ),
+      }));
+      console.error('Toggle group favorite error:', error);
+    }
+  },
 
   removeMemberLocally: (groupId, userId) => set((state) => {
     const updateMembers = (g: Group) =>

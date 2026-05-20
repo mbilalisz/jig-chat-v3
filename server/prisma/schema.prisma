@@ -30,6 +30,7 @@ model User {
   favorites        Favorite[]     @relation("FavoritedByUser")
   hiddenContacts   HiddenContact[] @relation("HidingUser")
   hiddenByUsers    HiddenContact[] @relation("HiddenByUser")
+  groupFavorites   GroupFavorite[]
 
   @@map("users")
 }
@@ -76,11 +77,24 @@ model Group {
   createdAt   DateTime @default(now()) @map("created_at")
 
   // Relations
-  owner    User          @relation("OwnedGroups", fields: [createdBy], references: [id])
-  members  GroupMember[]
-  messages Message[]
+  owner       User            @relation("OwnedGroups", fields: [createdBy], references: [id])
+  members     GroupMember[]
+  messages    Message[]
+  favoritedBy GroupFavorite[]
 
   @@map("groups")
+}
+
+model GroupFavorite {
+  userId    String   @map("user_id") @db.Uuid
+  groupId   String   @map("group_id") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  group Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@id([userId, groupId])
+  @@map("group_favorites")
 }
 
 model GroupMember {

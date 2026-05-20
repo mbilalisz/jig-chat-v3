@@ -6,6 +6,7 @@ import {
   updateGroup,
   addMember,
   removeMember,
+  toggleGroupFavorite,
 } from '../services/group.service';
 import { saveGroupMessage } from '../services/message.service';
 import { getIO } from '../lib/io';
@@ -85,6 +86,17 @@ router.post('/:groupId/members', async (req, res) => {
     res.status(201).json(newMember);
   } catch (e: any) {
     res.status(e.message === 'Unauthorized' ? 403 : 500).json({ message: e.message });
+  }
+});
+
+router.post('/favorite', async (req, res) => {
+  try {
+    const { userId, groupId } = req.body;
+    if (!userId || !groupId) return res.status(400).json({ message: 'userId and groupId are required' });
+    const result = await toggleGroupFavorite(userId, groupId);
+    res.json(result);
+  } catch (e: any) {
+    res.status(500).json({ message: e.message });
   }
 });
 

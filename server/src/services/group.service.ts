@@ -29,23 +29,32 @@ export const createGroup = async (
 };
 
 export const getUserGroups = async (userId: string) => {
-  const groups = await prisma.group.findMany({
-    where: { members: { some: { userId } } },
-    include: {
-      members: {
-        include: { user: { select: { id: true, name: true, avatarUrl: true } } },
+  const [groups, favoriteRows] = await Promise.all([
+    prisma.group.findMany({
+      where: { members: { some: { userId } } },
+      include: {
+        members: {
+          include: { user: { select: { id: true, name: true, avatarUrl: true } } },
+        },
+        messages: {
+          take: 1,
+          orderBy: { createdAt: 'desc' },
+          select: { content: true, createdAt: true, sender: { select: { id: true, name: true } } },
+        },
       },
-      messages: {
-        take: 1,
-        orderBy: { createdAt: 'desc' },
-        select: { content: true, createdAt: true },
-      },
-    },
-    orderBy: { createdAt: 'desc' },
-  });
+      orderBy: { createdAt: 'desc' },
+    }),
+    prisma.groupFavorite.findMany({
+      where: { userId },
+      select: { groupId: true },
+    }),
+  ]);
+
+  const favoriteSet = new Set(favoriteRows.map((r) => r.groupId));
 
   return groups.map((g) => ({
     ...g,
+    isFavorite: favoriteSet.has(g.id),
     messages: g.messages.map((m) => ({ ...m, content: decrypt(m.content) })),
   }));
 };
@@ -101,4 +110,20 @@ export const removeMember = async (groupId: string, requesterId: string, userId:
   return prisma.groupMember.delete({
     where: { groupId_userId: { groupId, userId } },
   });
+};
+
+export const toggleGroupFavorite = async (userId: string, groupId: string) => {
+  const existing = await prisma.groupFavorite.findUnique({
+    where: { userId_groupId: { userId, groupId } },
+  });
+
+  if (existing) {
+    await prisma.groupFavorite.delete({
+      where: { userId_groupId: { userId, groupId } },
+    });
+    return { isFavorite: false };
+  } else {
+    await prisma.groupFavorite.create({ data: { userId, groupId } });
+    return { isFavorite: true };
+  }
 };

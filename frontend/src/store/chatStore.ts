@@ -78,9 +78,10 @@ export const useChatStore = create<ChatState>((set, get) => ({
       : state.groupUnreadCounts,
   })),
   setMessages: (messages) => set({ messages }),
-  addMessage: (message) => set((state) => ({
-    messages: [...state.messages, message],
-  })),
+  addMessage: (message) => set((state) => {
+    if (state.messages.some((m) => m.id === message.id)) return state;
+    return { messages: [...state.messages, message] };
+  }),
   addGroupMessage: (message) => set((state) => ({
     groupMessages: [...state.groupMessages, message],
   })),
@@ -200,7 +201,22 @@ export const useChatStore = create<ChatState>((set, get) => ({
   fetchMessages: async (currentUserId, otherUserId) => {
     try {
       const response = await apiClient.get(`/messages/${currentUserId}/${otherUserId}`);
-      set({ messages: response.data });
+      set((state) => {
+        const fetchedIds = new Set(response.data.map((m: Message) => m.id));
+        // Preserve real-time messages that arrived during the fetch for this conversation
+        const realtimeMessages = state.messages.filter(
+          (m) =>
+            !fetchedIds.has(m.id) &&
+            ((m.senderId === currentUserId && m.receiverId === otherUserId) ||
+              (m.senderId === otherUserId && m.receiverId === currentUserId)),
+        );
+        const merged = [...response.data, ...realtimeMessages];
+        merged.sort(
+          (a: Message, b: Message) =>
+            new Date(a.createdAt || 0).getTime() - new Date(b.createdAt || 0).getTime(),
+        );
+        return { messages: merged };
+      });
     } catch (error) {
       console.error('Fetch messages error:', error);
     }

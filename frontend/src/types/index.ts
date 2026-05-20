@@ -53,6 +53,7 @@ export interface Group {
   avatarUrl?: string;
   createdBy: string;
   createdAt: string;
+  isFavorite?: boolean;
   members: GroupMember[];
   messages?: Array<{ content: string; createdAt: string; sender?: { id: string; name: string } }>;
 }
