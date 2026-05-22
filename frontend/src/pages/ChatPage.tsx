@@ -41,6 +41,19 @@ export const ChatPage: React.FC = () => {
     }
   }, [fetchUsers, fetchGroups, currentUser]);
 
+  // Re-fetch when the user returns to this tab after the browser suspended it.
+  useEffect(() => {
+    if (!currentUser) return;
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        fetchUsers(currentUser.id);
+        fetchGroups(currentUser.id);
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, [currentUser, fetchUsers, fetchGroups]);
+
   useEffect(() => {
     if (currentUser && selectedUser) {
       fetchMessages(currentUser.id, selectedUser.id);

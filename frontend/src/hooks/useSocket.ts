@@ -8,6 +8,14 @@ const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || 'http://localhost:5000';
 
 let socket: Socket | null = null;
 
+/** Called directly from authStore.logout() — must not rely on React lifecycle. */
+export const disconnectSocket = () => {
+  if (socket) {
+    socket.disconnect();
+    socket = null;
+  }
+};
+
 export const useSocket = () => {
   const user = useAuthStore((state) => state.user);
   const token = useAuthStore((state) => state.token);
@@ -20,8 +28,9 @@ export const useSocket = () => {
     if (!socket || !socket.connected) {
       socket = io(SOCKET_URL, {
         reconnection: true,
-        reconnectionAttempts: 5,
+        reconnectionAttempts: Infinity,
         reconnectionDelay: 1000,
+        reconnectionDelayMax: 10000,
         transports: ["websocket", "polling"],
         auth: { token },
       });
@@ -73,7 +82,9 @@ export const useSocket = () => {
             createdAt: message.createdAt,
           });
         } else {
-          fetchUsers(user.id);
+          // Always fetch the full list so the new contact appears regardless of
+          // which filter tab is currently active.
+          fetchUsers(user.id, 'All messages');
         }
 
         if (message.senderId !== user.id) {

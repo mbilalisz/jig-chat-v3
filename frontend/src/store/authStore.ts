@@ -22,10 +22,16 @@ export const useAuthStore = create<AuthState>()(
       updateUser: (data) => set((state) => ({ user: state.user ? { ...state.user, ...data } : state.user })),
       clearAuth: () => set({ user: null, token: null, isAuthenticated: false }),
       logout: async () => {
+        // Disconnect the socket first so the server fires user_offline immediately.
+        // This must happen before any state change that could unmount the component
+        // that hosts useSocket — once the component unmounts the effect cleanup runs
+        // but does NOT disconnect, so the socket would silently stay open.
+        const { disconnectSocket } = await import('../hooks/useSocket');
+        disconnectSocket();
+
         const token = get().token;
         if (token) {
           try {
-            // Import here to avoid circular dependency with api/client
             const { default: apiClient } = await import('../api/client');
             await apiClient.post('/auth/logout');
           } catch {

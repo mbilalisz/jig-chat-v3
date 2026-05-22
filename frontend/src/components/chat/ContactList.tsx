@@ -18,7 +18,7 @@ export const ContactList: React.FC = () => {
     users, setSelectedUser, selectedUser,
     selectedGroup, setSelectedGroup,
     markAsRead, groupUnreadCounts, groupLastMessages,
-    activeTab, hideContact,
+    activeTab, hideContact, isLoading,
   } = useChatStore();
   const [hoveredUserId, setHoveredUserId] = useState<string | null>(null);
   const { user: currentUser } = useAuthStore();
@@ -68,7 +68,23 @@ export const ContactList: React.FC = () => {
     });
   }, [filteredUsers, filteredGroups, groupLastMessages, groupUnreadCounts]);
 
-  if (items.length === 0) {
+  if (isLoading && items.length === 0) {
+    return (
+      <div className="flex-1 overflow-y-auto bg-white">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <div key={i} className="flex items-center px-6 py-3 border-b border-slate-50">
+            <div className="w-12 h-12 rounded-2xl bg-slate-100 animate-pulse shrink-0" />
+            <div className="flex-1 ml-4 space-y-2">
+              <div className="h-3.5 bg-slate-100 rounded animate-pulse w-2/5" />
+              <div className="h-3 bg-slate-100 rounded animate-pulse w-3/5" />
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  if (!isLoading && items.length === 0) {
     return (
       <div className="flex-1 flex flex-col items-center justify-center h-40 text-slate-300 italic">
         <p className="text-sm">No messages yet</p>

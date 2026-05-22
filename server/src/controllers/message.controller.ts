@@ -102,6 +102,8 @@ export const markAsRead = async (
   try {
     await markMessagesAsRead(senderId, receiverId);
     res.json({ message: "Messages marked as read" });
+    // Notify the original sender so they can show a read receipt on their side
+    getIO()?.to(senderId).emit('messages_read', { readerId: receiverId, senderId });
   } catch (error) {
     console.error("Mark as read error:", error);
     res.status(500).json({ message: "Server error" });

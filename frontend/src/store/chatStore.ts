@@ -52,6 +52,9 @@ interface ChatState {
   setHighlightedMessageId: (id: string | null) => void;
 
   ensureUserInList: (user: Pick<User, 'id' | 'name' | 'avatarUrl'>) => void;
+  updateUserProfile: (userId: string, data: { name?: string; avatarUrl?: string | null; bio?: string | null }) => void;
+  removeContactLocally: (userId: string) => void;
+  updateFavoriteStatus: (favoriteId: string, isFavorite: boolean) => void;
 }
 
 export const useChatStore = create<ChatState>((set, get) => ({
@@ -244,6 +247,29 @@ export const useChatStore = create<ChatState>((set, get) => ({
     };
     return { users: [...state.users, newUser] };
   }),
+
+  updateUserProfile: (userId, data) => set((state) => {
+    const patch: Partial<User> = {
+      ...(data.name !== undefined && { name: data.name }),
+      ...(data.avatarUrl !== undefined && { avatarUrl: data.avatarUrl ?? undefined, avatar: data.avatarUrl ?? undefined }),
+      ...(data.bio !== undefined && { bio: data.bio ?? undefined }),
+    };
+    return {
+      users: state.users.map((u) => u.id === userId ? { ...u, ...patch } : u),
+      selectedUser: state.selectedUser?.id === userId ? { ...state.selectedUser, ...patch } : state.selectedUser,
+      profilePanelUser: state.profilePanelUser?.id === userId ? { ...state.profilePanelUser, ...patch } : state.profilePanelUser,
+    };
+  }),
+
+  removeContactLocally: (userId) => set((state) => ({
+    users: state.users.filter((u) => u.id !== userId),
+    selectedUser: state.selectedUser?.id === userId ? null : state.selectedUser,
+  })),
+
+  updateFavoriteStatus: (favoriteId, isFavorite) => set((state) => ({
+    users: state.users.map((u) => u.id === favoriteId ? { ...u, isFavorite } : u),
+    selectedUser: state.selectedUser?.id === favoriteId ? { ...state.selectedUser, isFavorite } : state.selectedUser,
+  })),
 
   removeMessage: (messageId) => set((state) => ({
     messages: state.messages.filter((m) => m.id !== messageId),

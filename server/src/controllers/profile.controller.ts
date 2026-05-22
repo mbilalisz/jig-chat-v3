@@ -1,6 +1,7 @@
 import { Response } from 'express';
 import { AuthRequest } from '../middleware/auth.middleware';
 import { getProfile, updateProfile, changePassword } from '../services/profile.service';
+import { getIO } from '../lib/io';
 
 export const handleGetProfile = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
@@ -20,6 +21,13 @@ export const handleUpdateProfile = async (req: AuthRequest, res: Response): Prom
   try {
     const user = await updateProfile(req.userId!, { name, bio, avatarUrl });
     res.json(user);
+    // Broadcast to all connected clients so every contact list updates in real-time
+    getIO()?.emit('user_profile_updated', {
+      userId: req.userId!,
+      name,
+      bio: bio ?? null,
+      avatarUrl: avatarUrl ?? null,
+    });
   } catch (error: any) {
     console.error('Update profile error:', error);
     res.status(500).json({ message: 'Failed to update profile' });

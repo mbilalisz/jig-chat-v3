@@ -3,13 +3,18 @@ import { Plus } from "lucide-react";
 import { Button } from "../shared/Button";
 import { useChatStore } from "../../store/chatStore";
 import { useGroupStore } from "../../store/groupStore";
+import { useAuthStore } from "../../store/authStore";
 
 export const SidebarHeader: React.FC = () => {
-  const { activeTab, setActiveTab } = useChatStore();
+  const { activeTab, setActiveTab, fetchUsers } = useChatStore();
   const { setIsModalOpen } = useGroupStore();
+  const { user: currentUser } = useAuthStore();
 
   const handleTabChange = (tab: string) => {
     setActiveTab(tab);
+    if (currentUser) {
+      fetchUsers(currentUser.id, tab === 'All messages' ? undefined : tab);
+    }
   };
 
   return (

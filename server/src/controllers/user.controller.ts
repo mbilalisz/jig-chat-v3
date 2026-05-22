@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { getAllUsersWithStatus, getUserById, toggleFavorite, hideContact } from '../services/user.service';
 import { AuthRequest } from '../middleware/auth.middleware';
+import { getIO } from '../lib/io';
 
 export const handleGetUserById = async (req: Request, res: Response): Promise<void> => {
   const { id } = req.params;
@@ -34,15 +35,18 @@ export const handleHideContact = async (req: AuthRequest, res: Response): Promis
   try {
     await hideContact(hiderId, hiddenId);
     res.json({ message: 'Contact hidden' });
+    // Notify all sessions of the same user so every open tab removes the contact instantly
+    getIO()?.to(hiderId).emit('contact_hidden', { hiddenId });
   } catch (error) {
     console.error('Hide contact error:', error);
     res.status(500).json({ message: 'Server error' });
   }
 };
 
-export const handleToggleFavorite = async (req: Request, res: Response): Promise<void> => {
-  const { userId, favoriteId } = req.body;
-  
+export const handleToggleFavorite = async (req: AuthRequest, res: Response): Promise<void> => {
+  const userId = req.userId!;
+  const { favoriteId } = req.body;
+
   if (!userId || !favoriteId) {
     res.status(400).json({ message: 'User ID and Favorite ID are required' });
     return;
@@ -51,6 +55,8 @@ export const handleToggleFavorite = async (req: Request, res: Response): Promise
   try {
     const result = await toggleFavorite(userId, favoriteId);
     res.json(result);
+    // Sync across all sessions of the same user
+    getIO()?.to(userId).emit('favorite_toggled', { favoriteId, isFavorite: result.isFavorite });
   } catch (error) {
     console.error('Toggle favorite error:', error);
     res.status(500).json({ message: 'Server error' });
